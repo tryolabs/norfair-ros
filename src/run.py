@@ -57,7 +57,7 @@ class NorfairNode:
         # ROS subscriber and publisher definition
         self.pub = rospy.Publisher("norfair/detections", DetectionsMsg, queue_size=1)
         rospy.Subscriber("darknet_ros/bounding_boxes", BoundingBoxes, self.process_detections)
-        rospy.init_node("norfair")
+        rospy.init_node("norfair_node")
 
         rospy.spin()
 
