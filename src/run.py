@@ -5,12 +5,10 @@ import rospy
 from cv_bridge import CvBridge
 from darknet_ros_msgs.msg import BoundingBoxes
 from norfair import Detection, Tracker, Video
-from norfair.distances import create_normalized_mean_euclidean_distance
 from norfair_ros.msg import Detection as DetectionMsg
 from norfair_ros.msg import Detections as DetectionsMsg
+from norfair_ros.msg import Point
 from sensor_msgs.msg import Image
-
-DISTANCE_THRESHOLD_CENTROID: float = 0.08
 
 
 class NorfairNode:
@@ -28,9 +26,6 @@ class NorfairNode:
             )
         self.tracked_objects = self.tracker.update(self.detections)
 
-        rospy.loginfo(self.detections)
-        rospy.loginfo(self.tracked_objects)
-
         # Tracked objects to ROS message
         detection_msg = DetectionsMsg()
         detection_msg.detections = []
@@ -39,12 +34,9 @@ class NorfairNode:
             detection_msg.detections.append(
                 DetectionMsg(
                     id=tracked_object.id,
-                    xmin=tracked_object.last_detection.points[0][0],
-                    ymin=tracked_object.last_detection.points[0][1],
-                    xmax=tracked_object.last_detection.points[1][0],
-                    ymax=tracked_object.last_detection.points[1][1],
-                    probability=tracked_object.last_detection.scores[0],
-                    Class=tracked_object.last_detection.label,
+                    label=tracked_object.last_detection.label,
+                    scores=[score for score in tracked_object.last_detection.scores],
+                    points=[Point(point=point) for point in tracked_object.last_detection.points],
                 )
             )
 
@@ -53,36 +45,42 @@ class NorfairNode:
     def write_video(self, image):
         cv_image = self.bridge.imgmsg_to_cv2(image, desired_encoding="bgr8")
 
-        rospy.loginfo(self.detections)
-        rospy.loginfo(self.tracked_objects)
-
         norfair.draw_boxes(cv_image, self.detections)
         norfair.draw_tracked_boxes(cv_image, self.tracked_objects)
 
         self.video.write(cv_image)
 
     def main(self):
-        # Norfair initialization
-        distance_function = create_normalized_mean_euclidean_distance(1080, 720)
-        distance_threshold = DISTANCE_THRESHOLD_CENTROID
+        # Load parameters
+        norfair_setup = rospy.get_param("norfair_setup")
+        publisher_topics = rospy.get_param("publisher_topics")
+        subscriber_topics = rospy.get_param("subscriber_topics")
 
+        distance_function = norfair_setup["distance_function"]
+        distance_threshold = norfair_setup["distance_threshold"]
+        input_video = norfair_setup["input_video"]
+        norfair_publisher = publisher_topics["norfair_detections"]
+        detector_topic = subscriber_topics["detector"]
+        image_topic = subscriber_topics["image"]
+
+        # Norfair initialization
         self.tracker = Tracker(
             distance_function=distance_function,
             distance_threshold=distance_threshold,
         )
-
         self.detections = []
         self.tracked_objects = []
+        self.video = Video(input_path=input_video)
 
         self.bridge = CvBridge()
-        self.video = Video(input_path="/root/catkin_ws/src/publisher/src/example.mp4")
 
         rospy.init_node("norfair_node")
 
         # ROS subscriber and publisher definition
-        self.pub = rospy.Publisher("norfair/detections", DetectionsMsg, queue_size=1)
-        rospy.Subscriber("darknet_ros/bounding_boxes", BoundingBoxes, self.process_detections)
-        rospy.Subscriber("camera/rgb/image_raw", Image, self.write_video)
+        self.pub = rospy.Publisher(norfair_publisher, DetectionsMsg, queue_size=1)
+        rospy.Subscriber(detector_topic, BoundingBoxes, self.process_detections)
+        if input_video:
+            rospy.Subscriber(image_topic, Image, self.write_video)
 
         rospy.spin()
 

@@ -1,0 +1,18 @@
+subscriber_topics:
+  { detector: "darknet_ros/bounding_boxes", image: "camera/rgb/image_raw" }
+
+publisher_topics: { norfair_detections: "norfair/detections" }
+
+norfair_setup:
+  {
+    distance_function: "iou_opt",
+    distance_threshold: 0.9,
+    input_video: "/root/catkin_ws/src/publisher/src/example.mp4",
+    hit_counter_max: 15,
+    initialization_delay: 7.5,
+    pointwise_hit_counter_max: 4,
+    detection_threshold: 0.01,
+    past_detections_length: 4,
+    reid_distance_threshold: 0,
+    reid_hit_counter_max: 0,
+  }

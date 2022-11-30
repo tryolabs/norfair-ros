@@ -2,4 +2,6 @@
 
     <node pkg="norfair_ros" name="tracker" type="run.py"/>
 
+    <rosparam file="$(find norfair_ros)/config/config.yaml"/>
+
 </launch>
