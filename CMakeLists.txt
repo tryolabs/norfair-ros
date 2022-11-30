@@ -13,6 +13,7 @@ add_message_files(
   FILES
     Detection.msg 
     Detections.msg
+    Point.msg
 )
 
 generate_messages(
