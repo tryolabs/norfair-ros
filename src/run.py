@@ -14,14 +14,12 @@ from sensor_msgs.msg import Image
 class NorfairNode:
     def process_detections(self, bbox):
         self.detections = []
-        for detection in bbox.bounding_boxes:
+        for detection in bbox.detections:
             self.detections.append(
                 Detection(
-                    points=np.array(
-                        [[detection.xmin, detection.ymin], [detection.xmax, detection.ymax]]
-                    ),
-                    scores=np.array([detection.probability, detection.probability]),
-                    label=detection.Class,
+                    points=np.array([point.point for point in detection.points]),
+                    scores=np.array(detection.scores),
+                    label=detection.label,
                 )
             )
         self.tracked_objects = self.tracker.update(self.detections)
@@ -52,16 +50,10 @@ class NorfairNode:
 
     def main(self):
         # Load parameters
-        norfair_setup = rospy.get_param("norfair_setup")
-        publisher_topics = rospy.get_param("publisher_topics")
-        subscriber_topics = rospy.get_param("subscriber_topics")
-
-        distance_function = norfair_setup["distance_function"]
-        distance_threshold = norfair_setup["distance_threshold"]
-        input_video = norfair_setup["input_video"]
-        norfair_publisher = publisher_topics["norfair_detections"]
-        detector_topic = subscriber_topics["detector"]
-        image_topic = subscriber_topics["image"]
+        distance_function = rospy.get_param("distance_function")
+        distance_threshold = rospy.get_param("distance_threshold")
+        input_video = rospy.get_param("input_video")
+        image_topic = rospy.get_param("image")
 
         # Norfair initialization
         self.tracker = Tracker(
@@ -77,8 +69,8 @@ class NorfairNode:
         rospy.init_node("norfair_node")
 
         # ROS subscriber and publisher definition
-        self.pub = rospy.Publisher(norfair_publisher, DetectionsMsg, queue_size=1)
-        rospy.Subscriber(detector_topic, BoundingBoxes, self.process_detections)
+        self.pub = rospy.Publisher("norfair/detections", DetectionsMsg, queue_size=1)
+        rospy.Subscriber("norfair/converter", DetectionsMsg, self.process_detections)
         if input_video:
             rospy.Subscriber(image_topic, Image, self.write_video)
 
