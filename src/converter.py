@@ -7,7 +7,19 @@ from norfair_ros.msg import Point
 
 
 class Converter:
-    def boundingboxes_to_norfair(self, bboxes: BoundingBoxes):
+    """
+    The Converter class is a ROS node that converts different input messages to a norfair_ros input message.
+    """
+
+    def boundingboxes_to_norfair(self, bboxes: BoundingBoxes) -> None:
+        """
+        Convert BoundingBoxes message to DetectionsMsg message.
+
+        Parameters
+        ----------
+        bboxes : BoundingBoxes
+            BoundingBoxes message from darknet_ros.
+        """
         detections = []
         for bbox in bboxes.bounding_boxes:
             detections.append(
@@ -27,7 +39,7 @@ class Converter:
 
         self.converter_publisher.publish(detections_msg)
 
-    def main(self):
+    def main(self) -> None:
         rospy.init_node("converter")
 
         # Load parameters

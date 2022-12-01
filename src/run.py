@@ -12,7 +12,15 @@ from sensor_msgs.msg import Image
 
 
 class NorfairNode:
-    def process_detections(self, bbox):
+    def pipeline(self, bbox: DetectionsMsg):
+        """
+        Generate Norfair detections and pass them to the tracker.
+
+        Parameters
+        ----------
+        bbox : DetectionsMsg
+            DetectionsMsg message from converter.
+        """
         self.detections = []
         for detection in bbox.detections:
             self.detections.append(
@@ -40,7 +48,15 @@ class NorfairNode:
 
         self.pub.publish(detection_msg)
 
-    def write_video(self, image):
+    def write_video(self, image: Image):
+        """
+        Write video to file.
+
+        Parameters
+        ----------
+        image : Image
+            Message with the image.
+        """
         cv_image = self.bridge.imgmsg_to_cv2(image, desired_encoding="bgr8")
 
         norfair.draw_boxes(cv_image, self.detections)
@@ -49,6 +65,9 @@ class NorfairNode:
         self.video.write(cv_image)
 
     def main(self):
+        """
+        Norfair initialization and subscriber and publisher definition.
+        """
         # Load parameters
         distance_function = rospy.get_param("distance_function")
         distance_threshold = rospy.get_param("distance_threshold")
@@ -70,7 +89,7 @@ class NorfairNode:
 
         # ROS subscriber and publisher definition
         self.pub = rospy.Publisher("norfair/detections", DetectionsMsg, queue_size=1)
-        rospy.Subscriber("norfair/converter", DetectionsMsg, self.process_detections)
+        rospy.Subscriber("norfair/converter", DetectionsMsg, self.pipeline)
         if input_video:
             rospy.Subscriber(image_topic, Image, self.write_video)
 
