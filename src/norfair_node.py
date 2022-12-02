@@ -49,8 +49,9 @@ class NorfairNode:
         Norfair initialization and subscriber and publisher definition.
         """
         # Load parameters
-        distance_function = rospy.get_param("distance_function")
-        distance_threshold = rospy.get_param("distance_threshold")
+        norfair_setup = rospy.get_param("norfair_setup")
+        distance_function = norfair_setup["distance_function"]
+        distance_threshold = norfair_setup["distance_threshold"]
 
         # Norfair initialization
         self.tracker = Tracker(
@@ -62,9 +63,14 @@ class NorfairNode:
 
         rospy.init_node("norfair_node")
 
+        publishers = rospy.get_param("norfair_publishers")
+        subscribers = rospy.get_param("norfair_subscribers")
+        converter = subscribers["converter"]
+        norfair_detections = publishers["detections"]
+
         # ROS subscriber and publisher definition
-        self.pub = rospy.Publisher("norfair/detections", DetectionsMsg, queue_size=1)
-        rospy.Subscriber("norfair/converter", DetectionsMsg, self.pipeline)
+        self.pub = rospy.Publisher(norfair_detections["topic"], DetectionsMsg, queue_size=1)
+        rospy.Subscriber(converter["topic"], DetectionsMsg, self.pipeline)
 
         rospy.spin()
 

@@ -1,9 +1,20 @@
-distance_function: "iou_opt"
-distance_threshold: 0.9
-hit_counter_max: 15
-initialization_delay: 7.5
-pointwise_hit_counter_max: 4
-detection_threshold: 0.01
-past_detections_length: 4
-reid_distance_threshold: 0
-reid_hit_counter_max: 0
+norfair_subscribers:
+  converter:
+    topic: "norfair/converter"
+    queue_size: 1
+
+norfair_publishers:
+  detections:
+    topic: "norfair/detections"
+    queue_size: 1
+
+norfair_setup:
+  distance_function: "iou_opt"
+  distance_threshold: 0.9
+  hit_counter_max: 15
+  initialization_delay: 7.5
+  pointwise_hit_counter_max: 4
+  detection_threshold: 0.01
+  past_detections_length: 4
+  reid_distance_threshold: 0
+  reid_hit_counter_max: 0

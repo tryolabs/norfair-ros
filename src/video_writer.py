@@ -44,16 +44,18 @@ class VideoWriter:
         """
         If input_video is not empty, it will write the output video to a file, indicated by the input_video parameter.
         """
-        image_topic = rospy.get_param("image")
+        subscribers = rospy.get_param("video_writer_subscribers")
+        camera_reading = subscribers["camera_reading"]
         input_video = rospy.get_param("input_video")
+        norfair_detections = subscribers["detections"]
         self.video = Video(input_path=input_video)
         self.bridge = CvBridge()
 
         if input_video:
             rospy.init_node("video_writer")
 
-            image_sub = message_filters.Subscriber(image_topic, Image)
-            detections_sub = message_filters.Subscriber("norfair/detections", DetectionsMsg)
+            image_sub = message_filters.Subscriber(camera_reading["topic"], Image)
+            detections_sub = message_filters.Subscriber(norfair_detections["topic"], DetectionsMsg)
 
             ts = message_filters.ApproximateTimeSynchronizer([image_sub, detections_sub], 10, 10)
             ts.registerCallback(self.write_video)

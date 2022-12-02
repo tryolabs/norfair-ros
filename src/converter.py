@@ -43,12 +43,16 @@ class Converter:
         rospy.init_node("converter")
 
         # Load parameters
-        subscriber_topics = rospy.get_param("subscriber_topics")
-        darknet_detector = subscriber_topics["darknet"]
+        subscribers = rospy.get_param("converter_subscribers")
+        publishers = rospy.get_param("converter_publishers")
+        darknet_detector = subscribers["darknet"]
+        output = publishers["output"]
 
         # ROS subscriber definition
-        rospy.Subscriber(darknet_detector, BoundingBoxes, self.boundingboxes_to_norfair)
-        self.converter_publisher = rospy.Publisher("norfair/converter", DetectionsMsg, queue_size=1)
+        rospy.Subscriber(darknet_detector["topic"], BoundingBoxes, self.boundingboxes_to_norfair)
+        self.converter_publisher = rospy.Publisher(
+            output["topic"], DetectionsMsg, queue_size=output["queue_size"]
+        )
 
         rospy.spin()
 

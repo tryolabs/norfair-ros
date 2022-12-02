@@ -1,2 +1,9 @@
-image: "camera/rgb/image_raw"
+video_writer_subscribers:
+  camera_reading:
+    topic: "camera/rgb/image_raw"
+    queue_size: 1
+
+  detections:
+    topic: "norfair/detections"
+
 input_video: "/root/catkin_ws/src/publisher/src/example.mp4"
