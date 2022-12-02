@@ -1,7 +1,5 @@
-image: "camera/rgb/image_raw"
 distance_function: "iou_opt"
 distance_threshold: 0.9
-input_video: "/root/catkin_ws/src/publisher/src/example.mp4"
 hit_counter_max: 15
 initialization_delay: 7.5
 pointwise_hit_counter_max: 4

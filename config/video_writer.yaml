@@ -1,0 +1,2 @@
+image: "camera/rgb/image_raw"
+input_video: "/root/catkin_ws/src/publisher/src/example.mp4"

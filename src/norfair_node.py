@@ -1,14 +1,10 @@
 #!/usr/bin/env python3
-import norfair
 import numpy as np
 import rospy
-from cv_bridge import CvBridge
-from darknet_ros_msgs.msg import BoundingBoxes
-from norfair import Detection, Tracker, Video
+from norfair import Detection, Tracker
 from norfair_ros.msg import Detection as DetectionMsg
 from norfair_ros.msg import Detections as DetectionsMsg
 from norfair_ros.msg import Point
-from sensor_msgs.msg import Image
 
 
 class NorfairNode:
@@ -48,22 +44,6 @@ class NorfairNode:
 
         self.pub.publish(detection_msg)
 
-    def write_video(self, image: Image):
-        """
-        Write video to file.
-
-        Parameters
-        ----------
-        image : Image
-            Message with the image.
-        """
-        cv_image = self.bridge.imgmsg_to_cv2(image, desired_encoding="bgr8")
-
-        norfair.draw_boxes(cv_image, self.detections)
-        norfair.draw_tracked_boxes(cv_image, self.tracked_objects)
-
-        self.video.write(cv_image)
-
     def main(self):
         """
         Norfair initialization and subscriber and publisher definition.
@@ -71,8 +51,6 @@ class NorfairNode:
         # Load parameters
         distance_function = rospy.get_param("distance_function")
         distance_threshold = rospy.get_param("distance_threshold")
-        input_video = rospy.get_param("input_video")
-        image_topic = rospy.get_param("image")
 
         # Norfair initialization
         self.tracker = Tracker(
@@ -81,17 +59,12 @@ class NorfairNode:
         )
         self.detections = []
         self.tracked_objects = []
-        self.video = Video(input_path=input_video)
-
-        self.bridge = CvBridge()
 
         rospy.init_node("norfair_node")
 
         # ROS subscriber and publisher definition
         self.pub = rospy.Publisher("norfair/detections", DetectionsMsg, queue_size=1)
         rospy.Subscriber("norfair/converter", DetectionsMsg, self.pipeline)
-        if input_video:
-            rospy.Subscriber(image_topic, Image, self.write_video)
 
         rospy.spin()
 
