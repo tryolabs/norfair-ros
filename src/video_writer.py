@@ -11,7 +11,7 @@ from sensor_msgs.msg import Image
 
 class VideoWriter:
     """
-    This class write the Norfair's output video into a file.
+    This class writes Norfair's output video into a file.
     """
 
     def write_video(self, image: Image, detections: DetectionsMsg):

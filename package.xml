@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>norfair_ros</name>
-  <version>0.0.0</version>
-  <description>The norfair package</description>
+  <version>0.1.0</version>
+  <description>A customizable lightweight Python library for real-time multi-object tracking</description>
 
   <maintainer email="hello@tryolabs.com">Tryolabs</maintainer>
 
@@ -15,11 +15,13 @@
   <build_depend>sensor_msgs</build_depend>
   <build_depend>std_msgs</build_depend>
   <build_depend>message_generation</build_depend>
+  
   <build_export_depend>cv_bridge</build_export_depend>
   <build_export_depend>opencv2</build_export_depend>
   <build_export_depend>rospy</build_export_depend>
   <build_export_depend>sensor_msgs</build_export_depend>
   <build_export_depend>std_msgs</build_export_depend>
+  
   <exec_depend>cv_bridge</exec_depend>
   <exec_depend>opencv2</exec_depend>
   <exec_depend>rospy</exec_depend>
