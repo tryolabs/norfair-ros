@@ -1,7 +1,6 @@
 converter_subscribers:
   darknet:
     topic: "darknet_ros/bounding_boxes"
-    queue_size: 1
 
 converter_publishers:
   output:

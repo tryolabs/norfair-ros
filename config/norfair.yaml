@@ -1,7 +1,6 @@
 norfair_subscribers:
   converter:
     topic: "norfair/converter"
-    queue_size: 1
 
 norfair_publishers:
   detections:
