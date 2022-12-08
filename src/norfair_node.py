@@ -61,7 +61,7 @@ class NorfairNode:
         self.detections = []
         self.tracked_objects = []
 
-        rospy.init_node("norfair_node")
+        rospy.init_node("norfair_ros")
 
         publishers = rospy.get_param("norfair_publishers")
         subscribers = rospy.get_param("norfair_subscribers")
@@ -69,7 +69,9 @@ class NorfairNode:
         norfair_detections = publishers["detections"]
 
         # ROS subscriber and publisher definition
-        self.pub = rospy.Publisher(norfair_detections["topic"], DetectionsMsg, queue_size=1)
+        self.pub = rospy.Publisher(
+            norfair_detections["topic"], DetectionsMsg, queue_size=norfair_detections["queue_size"]
+        )
         rospy.Subscriber(converter["topic"], DetectionsMsg, self.pipeline)
 
         rospy.spin()
@@ -79,4 +81,4 @@ if __name__ == "__main__":
     try:
         NorfairNode().main()
     except rospy.ROSInterruptException:
-        pass
+        rospy.loginfo("Norfair node terminated.")

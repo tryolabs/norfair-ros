@@ -61,4 +61,4 @@ if __name__ == "__main__":
     try:
         Converter().main()
     except rospy.ROSInterruptException:
-        pass
+        rospy.loginfo("Converter node terminated.")
