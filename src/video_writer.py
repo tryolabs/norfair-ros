@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
+import cv2
 import message_filters
 import norfair
 import numpy as np
 import rospy
 from cv_bridge import CvBridge
-from norfair import Video
 from norfair_ros.msg import Detections as DetectionsMsg
 from sensor_msgs.msg import Image
 
@@ -46,18 +46,29 @@ class VideoWriter:
         """
         subscribers = rospy.get_param("video_writer_subscribers")
         camera_reading = subscribers["camera_reading"]
-        input_video = rospy.get_param("input_video")
         norfair_detections = subscribers["detections"]
-        self.video = Video(input_path=input_video)
         self.bridge = CvBridge()
 
-        if input_video:
+        output_path = rospy.get_param("output_path")
+        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+        output_size = (
+            camera_reading["width"],
+            camera_reading["height"],
+        )  # OpenCV format is (width, height)
+        self.video = cv2.VideoWriter(
+            output_path,
+            fourcc,
+            camera_reading["fps"],
+            output_size,
+        )
+
+        if output_path:
             rospy.init_node("video_writer")
 
             image_sub = message_filters.Subscriber(camera_reading["topic"], Image)
             detections_sub = message_filters.Subscriber(norfair_detections["topic"], DetectionsMsg)
 
-            ts = message_filters.ApproximateTimeSynchronizer([image_sub, detections_sub], 10, 10)
+            ts = message_filters.TimeSynchronizer([image_sub, detections_sub], 2)
             ts.registerCallback(self.write_video)
 
             rospy.spin()
@@ -67,4 +78,4 @@ if __name__ == "__main__":
     try:
         VideoWriter().main()
     except rospy.ROSInterruptException:
-        pass
+        rospy.loginfo("Video writer node terminated.")
