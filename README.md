@@ -13,13 +13,13 @@
 
 # A customizable lightweight Python library for real-time multi-object tracking
 
-## [Here](https://github.com/tryolabs/norfair) is the Norfair repository.
+## [Here](https://github.com/tryolabs/norfair) is the Norfair repository
 
 Norfair is now available also in the ROS ecosystem. With Norfair you can add tracking capability to different ROS detectors with a little effort.
 
 # How to use
 
-We build a [development repo](https://github.com/tryolabs/norfair-ros-dev) where you can find a functional environment running on Docker. This repository pretends to be an easy way to try and learn to use the Norfair node before integrating it into your own workspace.
+We build a [development repo](https://github.com/tryolabs/norfair-ros-dev) where you can find a functional environment running on Docker. This repository pretends to be an easy way to try and learn how to use the Norfair node before integrating it into your workspace.
 
 # Installation
 
@@ -99,7 +99,7 @@ The parameters are defined in the `config/norfair.yaml` file.
 
 The `norfair-ros` also includes a node called `video_writer`. With this node, you can save a video with the Norfair outputs and watch the tracking results easier.
 
-This node has to subscribe to the same topic that publishes the images to the detector. In the development repository, we call `publisher`. This node needs the detections also, and for this reason, is subscribed to the Norfair output topic.
+This node has to subscribe to the same topic that publishes the images to the detector. In the [development repository](https://github.com/tryolabs/norfair-ros-dev), we call `publisher`. This node needs the detections also, and for this reason, is subscribed to the Norfair output topic.
 
 Combining these data we can write the information in the video and generate a new file with the output.
 

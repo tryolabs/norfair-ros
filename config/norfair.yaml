@@ -15,5 +15,3 @@ norfair_setup:
   pointwise_hit_counter_max: 4
   detection_threshold: 0.01
   past_detections_length: 4
-  reid_distance_threshold: 0
-  reid_hit_counter_max: 0

@@ -52,14 +52,23 @@ class NorfairNode:
         norfair_setup = rospy.get_param("norfair_setup")
         distance_function = norfair_setup["distance_function"]
         distance_threshold = norfair_setup["distance_threshold"]
+        hit_counter_max = norfair_setup["hit_counter_max"]
+        initialization_delay = norfair_setup["initialization_delay"]
+        pointwise_hit_counter_max = norfair_setup["pointwise_hit_counter_max"]
+        detection_threshold = norfair_setup["detection_threshold"]
+        past_detections_length = norfair_setup["past_detections_length"]
 
-        # Norfair initialization
+        # Norfair tracker initialization
         self.tracker = Tracker(
             distance_function=distance_function,
             distance_threshold=distance_threshold,
+            hit_counter_max=hit_counter_max,
+            initialization_delay=initialization_delay,
+            pointwise_hit_counter_max=pointwise_hit_counter_max,
+            detection_threshold=detection_threshold,
+            past_detections_length=past_detections_length,
         )
         self.detections = []
-        self.tracked_objects = []
 
         rospy.init_node("norfair_ros")
 
