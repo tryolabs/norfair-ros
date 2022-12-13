@@ -14,7 +14,7 @@ class VideoWriter:
     This class writes Norfair's output video into a file.
     """
 
-    def write_video(self, image: Image, detections: DetectionsMsg):
+    def write_video(self, image: Image):
         """
         Write video to file.
 
@@ -23,22 +23,32 @@ class VideoWriter:
         image : Image
             Message with the image.
         """
-        # Transform DetectionsMsg to Norfair detections
-        norfair_detections = []
-        for detection in detections.detections:
-            norfair_detections.append(
-                norfair.Detection(
-                    points=np.array([point.point for point in detection.points]),
-                    scores=np.array(detection.scores),
-                    label=detection.label,
-                )
-            )
 
         cv_image = self.bridge.imgmsg_to_cv2(image, desired_encoding="bgr8")
 
-        norfair.draw_boxes(cv_image, norfair_detections)
+        norfair.draw_boxes(cv_image, self.detections, draw_labels=True)
 
         self.video.write(cv_image)
+
+    def update_detections(self, detections: DetectionsMsg):
+        """
+        Update the detections.
+
+        Parameters
+        ----------
+        detections : DetectionsMsg
+            Message with the detections.
+        """
+        # Transform DetectionsMsg to Norfair detections
+        self.detections = []
+        for detection in detections.detections:
+            self.detections.append(
+                norfair.Detection(
+                    points=np.array([point.point for point in detection.points]),
+                    scores=np.array(detection.scores),
+                    label=detection.id,
+                )
+            )
 
     def main(self):
         """
@@ -65,11 +75,10 @@ class VideoWriter:
         if output_path:
             rospy.init_node("video_writer")
 
-            image_sub = message_filters.Subscriber(camera_reading["topic"], Image)
-            detections_sub = message_filters.Subscriber(norfair_detections["topic"], DetectionsMsg)
+            self.detections = []
 
-            ts = message_filters.TimeSynchronizer([image_sub, detections_sub], 2)
-            ts.registerCallback(self.write_video)
+            rospy.Subscriber(camera_reading["topic"], Image, self.write_video)
+            rospy.Subscriber(norfair_detections["topic"], DetectionsMsg, self.update_detections)
 
             rospy.spin()
 
