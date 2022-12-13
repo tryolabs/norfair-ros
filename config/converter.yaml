@@ -4,5 +4,5 @@ converter_subscribers:
 
 converter_publishers:
   output:
-    topic: "norfair/converter"
+    topic: "norfair/input"
     queue_size: 1

@@ -1,10 +1,10 @@
 norfair_subscribers:
   converter:
-    topic: "norfair/converter"
+    topic: "norfair/input"
 
 norfair_publishers:
   detections:
-    topic: "norfair/detections"
+    topic: "norfair/output"
     queue_size: 1
 
 norfair_setup:

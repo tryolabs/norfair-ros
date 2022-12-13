@@ -6,6 +6,6 @@ video_writer_subscribers:
     height: 720
 
   detections:
-    topic: "norfair/detections"
+    topic: "norfair/output"
 
 output_path: "/root/catkin_ws/src/publisher/src/example_out.mp4"
