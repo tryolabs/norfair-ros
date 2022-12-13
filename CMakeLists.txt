@@ -14,6 +14,8 @@ add_message_files(
     Detection.msg 
     Detections.msg
     Point.msg
+    BoundingBox.msg
+    BoundingBoxes.msg
 )
 
 generate_messages(

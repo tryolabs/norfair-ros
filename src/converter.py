@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import rospy
-from darknet_ros_msgs.msg import BoundingBoxes
+from norfair_ros.msg import BoundingBoxes
 from norfair_ros.msg import Detection as DetectionMsg
 from norfair_ros.msg import Detections as DetectionsMsg
 from norfair_ros.msg import Point
