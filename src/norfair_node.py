@@ -78,7 +78,7 @@ class NorfairNode:
 
             self.pub.publish(detection_msg)
 
-            rospy.Rate(10).sleep()
+            rospy.Rate(publishers["rate"]).sleep()
 
 
 if __name__ == "__main__":
