@@ -1,0 +1,8 @@
+<launch>
+  
+  <node pkg="norfair_ros" name="tracker" type="norfair_node.py"/>
+  <rosparam file="$(find norfair_ros)/test/config/tracker.yaml"/>
+
+  <test test-name="test_norfair_ros" pkg="norfair_ros" type="tracker_output.py" />
+
+</launch>

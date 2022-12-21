@@ -1,0 +1,23 @@
+norfair_subscribers:
+  converter:
+    topic: "norfair/input"
+
+norfair_publishers:
+  detections:
+    topic: "norfair/output"
+    queue_size: 1
+  rate: 10
+
+converter_publishers:
+  output:
+    topic: "norfair/input"
+    queue_size: 1
+
+norfair_setup:
+  distance_function: "iou_opt"
+  distance_threshold: 0.9
+  hit_counter_max: 15
+  initialization_delay: 0
+  pointwise_hit_counter_max: 4
+  detection_threshold: 0.01
+  past_detections_length: 4
