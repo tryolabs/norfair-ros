@@ -8,7 +8,31 @@ from norfair_ros.msg import Point
 
 
 class NorfairNode:
-    def update(self, bbox: DetectionsMsg):
+    def publisher(self, tracked_objects: list):
+        """
+        Tracked objects to ROS message.
+
+        Parameters
+        ----------
+        tracked_objects : list
+            List of tracked objects.
+        """
+        detection_msg = DetectionsMsg()
+        detection_msg.detections = []
+
+        for tracked_object in tracked_objects:
+            detection_msg.detections.append(
+                DetectionMsg(
+                    id=tracked_object.id,
+                    label=tracked_object.last_detection.label,
+                    scores=[score for score in tracked_object.last_detection.scores],
+                    points=[Point(point=point) for point in tracked_object.last_detection.points],
+                )
+            )
+
+        self.pub.publish(detection_msg)
+
+    def pipeline(self, bbox: DetectionsMsg):
         """
         Generate Norfair detections and pass them to the tracker.
 
@@ -26,7 +50,9 @@ class NorfairNode:
                     label=detection.label,
                 )
             )
-        self.tracked_objects = self.tracker.update(detections)
+        tracked_objects = self.tracker.update(detections)
+
+        self.publisher(tracked_objects)
 
     def main(self):
         """
@@ -57,28 +83,9 @@ class NorfairNode:
         self.pub = rospy.Publisher(
             norfair_detections["topic"], DetectionsMsg, queue_size=norfair_detections["queue_size"]
         )
-        rospy.Subscriber(converter["topic"], DetectionsMsg, self.update)
+        rospy.Subscriber(converter["topic"], DetectionsMsg, self.pipeline)
 
-        while not rospy.is_shutdown():
-            # Tracked objects to ROS message
-            detection_msg = DetectionsMsg()
-            detection_msg.detections = []
-
-            for tracked_object in self.tracked_objects:
-                detection_msg.detections.append(
-                    DetectionMsg(
-                        id=tracked_object.id,
-                        label=tracked_object.last_detection.label,
-                        scores=[score for score in tracked_object.last_detection.scores],
-                        points=[
-                            Point(point=point) for point in tracked_object.last_detection.points
-                        ],
-                    )
-                )
-
-            self.pub.publish(detection_msg)
-
-            rospy.Rate(publishers["rate"]).sleep()
+        rospy.spin()
 
 
 if __name__ == "__main__":

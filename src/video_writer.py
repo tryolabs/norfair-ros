@@ -14,7 +14,37 @@ class VideoWriter:
     This class writes Norfair's output video into a file.
     """
 
-    def write_video(self, image: Image):
+    def get_video_writer(self, output_path: str, camera_reading: dict) -> cv2.VideoWriter:
+        """
+        Get video writer.
+
+        Parameters
+        ----------
+        output_path : str
+            Path to the output video.
+        camera_reading : dict
+            Camera reading parameters.
+
+        Returns
+        -------
+        cv2.VideoWriter
+            Video writer.
+        """
+        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+        output_size = (
+            camera_reading["width"],
+            camera_reading["height"],
+        )
+        video = cv2.VideoWriter(
+            output_path,
+            fourcc,
+            camera_reading["fps"],
+            output_size,
+        )
+
+        return video
+
+    def write_video(self, image: Image, detections: DetectionsMsg):
         """
         Write video to file.
 
@@ -22,27 +52,14 @@ class VideoWriter:
         ----------
         image : Image
             Message with the image.
-        """
-
-        cv_image = self.bridge.imgmsg_to_cv2(image, desired_encoding="bgr8")
-
-        norfair.draw_boxes(cv_image, self.detections, draw_labels=True)
-
-        self.video.write(cv_image)
-
-    def update_detections(self, detections: DetectionsMsg):
-        """
-        Update the detections.
-
-        Parameters
-        ----------
         detections : DetectionsMsg
             Message with the detections.
         """
+
         # Transform DetectionsMsg to Norfair detections
-        self.detections = []
+        norfair_detections = []
         for detection in detections.detections:
-            self.detections.append(
+            norfair_detections.append(
                 norfair.Detection(
                     points=np.array([point.point for point in detection.points]),
                     scores=np.array(detection.scores),
@@ -50,35 +67,33 @@ class VideoWriter:
                 )
             )
 
+        cv_image = self.bridge.imgmsg_to_cv2(image, desired_encoding="bgr8")
+
+        norfair.draw_boxes(cv_image, norfair_detections, draw_labels=True)
+
+        self.video.write(cv_image)
+
     def main(self):
         """
-        If input_video is not empty, it will write the output video to a file, indicated by the input_video parameter.
+        If output_path is not empty, it will write the output video to a file, indicated by the output_path parameter.
         """
         subscribers = rospy.get_param("video_writer_subscribers")
         camera_reading = subscribers["camera_reading"]
         norfair_detections = subscribers["detections"]
-        self.bridge = CvBridge()
 
+        self.bridge = CvBridge()
         output_path = rospy.get_param("output_path")
-        fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-        output_size = (
-            camera_reading["width"],
-            camera_reading["height"],
-        )  # OpenCV format is (width, height)
-        self.video = cv2.VideoWriter(
-            output_path,
-            fourcc,
-            camera_reading["fps"],
-            output_size,
-        )
+
+        self.video = self.get_video_writer(output_path, camera_reading)
 
         if output_path:
             rospy.init_node("video_writer")
 
-            self.detections = []
+            image_sub = message_filters.Subscriber(camera_reading["topic"], Image)
+            detections_sub = message_filters.Subscriber(norfair_detections["topic"], DetectionsMsg)
 
-            rospy.Subscriber(camera_reading["topic"], Image, self.write_video)
-            rospy.Subscriber(norfair_detections["topic"], DetectionsMsg, self.update_detections)
+            ts = message_filters.TimeSynchronizer([image_sub, detections_sub], 2)
+            ts.registerCallback(self.write_video)
 
             rospy.spin()
 

@@ -6,7 +6,6 @@ norfair_publishers:
   detections:
     topic: "norfair/output"
     queue_size: 1
-  rate: 10
 
 norfair_setup:
   distance_function: "iou_opt"
