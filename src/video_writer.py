@@ -5,6 +5,7 @@ import norfair
 import numpy as np
 import rospy
 from cv_bridge import CvBridge
+from norfair.drawing import Drawable
 from norfair_ros.msg import Detections as DetectionsMsg
 from sensor_msgs.msg import Image
 
@@ -56,20 +57,21 @@ class VideoWriter:
             Message with the detections.
         """
 
-        # Transform DetectionsMsg to Norfair detections
-        norfair_detections = []
+        # Transform DetectionsMsg to Norfair Drawable
+        drawables = []
         for detection in detections.detections:
-            norfair_detections.append(
-                norfair.Detection(
+            drawables.append(
+                Drawable(
                     points=np.array([point.point for point in detection.points]),
+                    label=detection.label,
+                    id=detection.id,
                     scores=np.array(detection.scores),
-                    label=detection.id,
                 )
             )
 
         cv_image = self.bridge.imgmsg_to_cv2(image, desired_encoding="bgr8")
 
-        norfair.draw_boxes(cv_image, norfair_detections, draw_labels=True)
+        norfair.draw_boxes(cv_image, drawables=drawables, draw_ids=True)
 
         self.video.write(cv_image)
 
