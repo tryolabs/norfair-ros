@@ -4,6 +4,12 @@
 
 # How to use
 
+Norfair is a Python package that implements a multi-object tracking algorithm. This package is designed to be an interface between Norfair and ROS. The package is built into three nodes, `converter`, `video_writer`, and `norfair_ros`.
+
+The typical flow of the package is reading the detections from a detector node, converting them to the Norfair format, and publishing the tracking results.
+
+Norfair offers a drawing API to visualize the tracking results. This package uses this API to draw the tracking results and save them as a video file. This is particularly useful for the debugging process.
+
 We build a [development repository](https://github.com/tryolabs/norfair-ros-dev) where you can find a functional environment running on Docker. This repository pretends to be an easy way to try and learn how to use the Norfair package before integrating it into your workspace.
 
 # Installation
@@ -19,18 +25,23 @@ cd catkin_ws/src
 git clone git@github.com:tryolabs/norfair-ros.git
 ```
 
-After that, build.
+After that, build. Depending on the versions of catkin are using you can run:
 
 ```
 cd ..
 catkin_make
 ```
 
+Or, run this with the new catkin tools.
+
+```
+roscd norfair_ros
+catkin build
+```
+
 ## Dependencies
 
-This package needs ROS, if you do not have ROS installed [here](http://wiki.ros.org/ROS/Installation) you can find a guide to install it.
-
-Also, [Norfair](https://github.com/tryolabs/norfair) is required. You can install with `pip install norfair`.
+This package is built on Python and depends on [Norfair](https://github.com/tryolabs/norfair). You can install with `pip install norfair`.
 
 # Nodes
 
@@ -42,68 +53,36 @@ You can define your conversions in the `converter` or use the provided implement
 
 The converter normalized output is read by the `norfair_ros` node and tracking them as output.
 
-The `video_writer` node is uses to save the Norfair output video.
+The `video_writer` node is used to save the Norfair output video.
 
-## `converter`
+You can find more information about each node, as subscribed/published topics, and parameters in [this](src/nodes_doc.md) specific documentation.
 
-## Topics
+# Example usage
 
-### Subscribed
+This package has a [launch file](launch/norfair_node.launch) designed to run the three nodes in a single command. A common practice in ROS is to have a startup package that launches all the nodes in a single command. In this case, you can include this launch file in your startup package.
 
-- Detector: `darknet_ros/bounding_boxes`
+In case you like to launch this package from the command line you can do it in the following way.
 
-If you like to add different detectors, you must subscribe to their output here and define a function to convert the format used by the detector to the one required by Norfair, defined in the `Detection.msg` file.
+```
+roslaunch norfair_ros norfair_ros.launch
+```
 
-### Published
+This command initializes the `converter`, `video_writer`, and `norfair_ros` nodes with the default parameters defined in [config files](config/).
 
-- Converter output: `norfair/input`
+As mentioned before, in case you not working with the `darknet_ros` detector, you need to define your own conversions in the `converter` node. This conversion needs to transform your detector format to the Norfair format defined in the message [Detections.msg](msg/Detections.msg).
 
-## Parameters
+After that, you can publish your detection to the Norfair inputs topic called `norfair/input`. The node process the detections and publish the tracking information to the topic `norfair/output`.
 
-The parameters are defined in the `config/converter.yaml` file.
+If you like to use the video writer node, you must publish your image to the topic `camera/rgb/image_raw` using the `Image` type and modify the path to save the output video in the `config/video_writer.yaml` file.
 
-## `norfair_ros`
-
-## Topics
-
-### Subscribed
-
-This node is subscribed only to the converter output.
-
-- Converter output: `norfair/input`
-
-### Published
-
-After adding the tracking capability to the detections, Norfair published this as output.
-
-- Norfair output: `norfair/output`
-
-## Parameters
-
-The parameters are defined in the `config/norfair.yaml` file.
-
-## `video_writer`
-
-## Topics
-
-### Subscribed
-
-This node needs the image and the tracking output. For this reason, it is subscribed to the image topic and the Norfair output topic. In the case of the [development repository](https://github.com/tryolabs/norfair-ros-dev) it is subscribe to the following topics.
-
-- Image: `camera/rgb/image_raw`
-
-- Norfair output: `norfair/output`
-
-This node uses `TimeSynchronizer` to synchronize the data from the image and the Norfair output. You must set the correct frequency to the node that publishes the image to prevent losing frames.
-
-Once this node receives the data, it saves the frame with the drawn bounding boxes and the tracking information into a video file.
-
-## Parameters
-
-The parameters are defined in the `config/video_writer.yaml` file.
+In the case that you like to change the names of the subscribed/published topics, you can do it in the [config files](config/).
 
 # Debugging
 
 We suggest using the `video_writer` node to debug the tracking process.
 
 To enable this capability you have to edit the `config/video_writer.yaml` file and set the `output_path` argument with the desired output path and change the necessary configuration to your particular case in the same file.
+
+The output video will include the bounding boxes and the tracking information.
+
+To prevent an unsynchronized situation you must set properly the publisher rate of your images to prevent the `video_writer` node is faster than the `norfair_ros` node, losing frames.
