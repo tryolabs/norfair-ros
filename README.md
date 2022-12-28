@@ -41,7 +41,12 @@ catkin build
 
 ## Dependencies
 
-This package is built on Python and depends on [Norfair](https://github.com/tryolabs/norfair). You can install with `pip install norfair`.
+This package is built on Python and depends on:
+
+- [Norfair](https://github.com/tryolabs/norfair). You can install with `pip install norfair`.
+- [NumPy](https://numpy.org/). You can install with `pip install numpy`.
+
+Also, we generate a `setup.py` file to install the package with `pip install .` in the root of the package.
 
 # Nodes
 

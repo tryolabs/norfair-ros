@@ -1,0 +1,36 @@
+from setuptools import setup
+
+setup(
+    name="norfair-ros",
+    version="0.1.0",
+    packages=[],
+    package_dir={"": "src"},
+    install_requires=[
+        "norfair",
+        "numpy",
+    ],
+    author="Tryolabs",
+    author_email="hello@tryolabs.com",
+    maintainer="Tryolabs",
+    maintainer_email="hello@tryolabs.com",
+    description="ROS package for multi-object tracking using Norfair.",
+    license="BSD-3-Clause",
+    test_suite="",
+    keywords=[
+        "ROS",
+        "Tracking",
+        "Computer Vision",
+        "tracking",
+        "object-detection",
+        "object-tracking",
+        "kalman-filter",
+        "pose-estimation",
+        "re-identification",
+        "multi-object-tracking",
+        "re-id",
+        "tracking-algorithm",
+        "deepsort",
+        "video-tracking",
+        "video-inference-loop",
+    ],
+)
